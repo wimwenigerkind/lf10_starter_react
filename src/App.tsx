@@ -1,45 +1,39 @@
 import './App.css'
-import {Container, Nav, Navbar} from "react-bootstrap";
-import {Link, Route, Routes} from "react-router-dom";
-import {UnsecuredFoo} from "./pages/UnsecuredFoo.tsx";
-import {SecuredBar} from "./pages/SecuredBar.tsx";
-import {Home} from "./pages/Home.tsx";
+import {Route, Routes} from "react-router-dom";
+import {Dashboard} from "./pages/Dashboard.tsx";
 import RequireAuth from "./auth/RequireAuth.tsx";
 import {EmployeeTable} from "./pages/EmployeeTable.tsx";
+import {AppSidebar} from "@/components/app-sidebar.tsx";
+import {SidebarInset, SidebarProvider} from "@/components/ui/sidebar.tsx";
+import {SiteHeader} from "@/components/site-header.tsx";
 
 function App() {
-
-
     return (
-        <Container>
-            <Navbar bg="light" expand="lg">
-                <Container>
-                    <Navbar.Brand href="#home">React-Bootstrap</Navbar.Brand>
-                    <Navbar.Toggle aria-controls="basic-navbar-nav"/>
-                    <Navbar.Collapse id="basic-navbar-nav">
-                        <Nav className="me-auto">
-                            <Nav.Link as={Link} to="/foo">Foo</Nav.Link>
-                            <Nav.Link as={Link} to="/bar">Bar</Nav.Link>
-                            <Nav.Link as={Link} to="/employees">Mitarbeiter</Nav.Link>
-                        </Nav>
-                    </Navbar.Collapse>
-                </Container>
-            </Navbar>
-            <Routes>
-                <Route path="/" element={<Home/>}/>
-                <Route path="/foo" element={<UnsecuredFoo/>}/>
-                <Route path="/bar" element={
-                    <RequireAuth>
-                        <SecuredBar/>
-                    </RequireAuth>
-                }/>
-                <Route path="/employees" element={
-                    <RequireAuth>
-                        <EmployeeTable/>
-                    </RequireAuth>
-                }/>
-            </Routes>
-        </Container>
+        <SidebarProvider
+            style={
+                {
+                    "--sidebar-width": "calc(var(--spacing) * 72)",
+                    "--header-height": "calc(var(--spacing) * 12)",
+                } as React.CSSProperties
+            }
+        >
+            <AppSidebar variant="inset" />
+            <SidebarInset>
+                <SiteHeader />
+                <Routes>
+                    <Route path="/" element={
+                        <RequireAuth>
+                            <Dashboard/>
+                        </RequireAuth>
+                        }/>
+                    <Route path="/employees" element={
+                        <RequireAuth>
+                            <EmployeeTable/>
+                        </RequireAuth>
+                    }/>
+                </Routes>
+            </SidebarInset>
+        </SidebarProvider>
     )
 }
 

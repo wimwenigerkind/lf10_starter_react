@@ -2,9 +2,3 @@ body {
     margin: 0;
     padding: 0;
 }
-
-.container,
-.container-fluid {
-    align-items: flex-start !important;
-    justify-content: flex-start !important;
-}
