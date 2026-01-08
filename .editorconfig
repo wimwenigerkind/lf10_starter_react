@@ -1,0 +1,9 @@
+# EditorConfig is awesome: https://editorconfig.org
+
+root = true
+
+[*.tsx]
+indent_size = 2
+
+[*.ts]
+indent_size = 2
