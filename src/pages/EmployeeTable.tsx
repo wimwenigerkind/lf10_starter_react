@@ -138,7 +138,7 @@ export function EmployeeTable() {
 
   useEffect(() => {
     fetchEmployees().then((data) => setEmployees(data || [])).catch((err) => console.error(err));
-  }, []);
+  }, [fetchEmployees]);
 
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
