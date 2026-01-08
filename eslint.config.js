@@ -3,7 +3,7 @@ import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
-import { globalIgnores } from 'eslint/config'
+import {globalIgnores} from 'eslint/config'
 
 export default tseslint.config([
   globalIgnores(['dist']),
@@ -15,6 +15,10 @@ export default tseslint.config([
       reactHooks.configs['recommended-latest'],
       reactRefresh.configs.vite,
     ],
+    rules: {
+      // TODO: Enable these rules after fixing existing issues @see https://github.com/shadcn-ui/ui/issues/7736
+      "react-refresh/only-export-components": "off",
+    },
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
