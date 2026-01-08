@@ -20,18 +20,20 @@ function App() {
             <AppSidebar variant="inset" />
             <SidebarInset>
                 <SiteHeader />
-                <Routes>
+                <div className={"p-4"}>
+                  <Routes>
                     <Route path="/" element={
-                        <RequireAuth>
-                            <Dashboard/>
-                        </RequireAuth>
-                        }/>
-                    <Route path="/employees" element={
-                        <RequireAuth>
-                            <EmployeeTable/>
-                        </RequireAuth>
+                      <RequireAuth>
+                        <Dashboard/>
+                      </RequireAuth>
                     }/>
-                </Routes>
+                    <Route path="/employees" element={
+                      <RequireAuth>
+                        <EmployeeTable/>
+                      </RequireAuth>
+                    }/>
+                  </Routes>
+                </div>
             </SidebarInset>
         </SidebarProvider>
     )
