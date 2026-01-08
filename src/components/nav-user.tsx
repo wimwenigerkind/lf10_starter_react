@@ -42,7 +42,7 @@ export function NavUser() {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg grayscale">
+              <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user?.profile.email ? gravatarUrl({ email: user.profile.email }) : undefined} alt={user?.profile.name}/>
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
