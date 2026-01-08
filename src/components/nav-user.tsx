@@ -27,6 +27,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import {useAuth} from "react-oidc-context";
+import {gravatarUrl} from "@/lib/utils.ts";
 
 export function NavUser() {
   const {isMobile} = useSidebar()
@@ -42,7 +43,7 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
-                <AvatarImage src={user?.profile.picture} alt={user?.profile.name}/>
+                <AvatarImage src={user?.profile.email ? gravatarUrl({ email: user.profile.email }) : undefined} alt={user?.profile.name}/>
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
