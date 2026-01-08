@@ -1,5 +1,5 @@
 import {useAuth} from "react-oidc-context";
-import {useState} from "react";
+import {useState, useCallback} from "react";
 
 const apiUrl = import.meta.env.VITE_EMS_API_URL || 'http://localhost:8089';
 
@@ -8,7 +8,7 @@ export function useEmployeeApi() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchEmployees = async () => {
+    const fetchEmployees = useCallback(async () => {
         setLoading(true);
         setError(null);
 
@@ -31,7 +31,7 @@ export function useEmployeeApi() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [auth.user?.access_token]);
 
     return {fetchEmployees, loading, error};
 }
