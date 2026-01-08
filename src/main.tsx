@@ -6,9 +6,12 @@ import App from './App.tsx'
 import {BrowserRouter} from "react-router-dom";
 import {AuthProvider} from "react-oidc-context";
 
+const oidcAuthorityUrl = import.meta.env.VITE_OIDC_AUTHORITY_URL || 'http://localhost:9000/application/o/employee_api';
+const oidcClientId = import.meta.env.VITE_OIDC_CLIENT_ID || 'employee_api_client';
+
 const oidc = {
-    authority: "http://localhost:9000/application/o/employee_api",
-    client_id: "employee_api_client",
+    authority: oidcAuthorityUrl,
+    client_id: oidcClientId,
     redirect_uri: `${window.location.origin}/callback`,
     post_logout_redirect_uri: `${window.location.origin}/`,
     response_type: "code",

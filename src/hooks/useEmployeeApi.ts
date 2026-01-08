@@ -1,6 +1,8 @@
 import {useAuth} from "react-oidc-context";
 import {useState} from "react";
 
+const apiUrl = import.meta.env.VITE_EMS_API_URL || 'http://localhost:8089';
+
 export function useEmployeeApi() {
     const auth = useAuth();
     const [loading, setLoading] = useState(false);
@@ -19,7 +21,7 @@ export function useEmployeeApi() {
                 headers['Authorization'] = `Bearer ${auth.user.access_token}`;
             }
 
-            const response = await fetch('http://localhost:8089/employees', {headers});
+            const response = await fetch(apiUrl + '/employees', {headers});
             if (!response.ok) {
                 setError("Fehler beim Laden der Mitarbeiter");
             }
