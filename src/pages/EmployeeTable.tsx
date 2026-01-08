@@ -40,6 +40,10 @@ export type Employee = {
   id: string
   firstName: string
   lastName: string
+  phone: string;
+  street: string;
+  postcode: string;
+  city: string;
 }
 
 // FIXME: split into multiple files
@@ -103,6 +107,36 @@ const columns: ColumnDef<Employee>[] = [
     cell: ({ row }) => <div>{row.getValue("lastName")}</div>,
   },
   {
+    accessorKey: "phone",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Phone Number
+          <ArrowUpDown />
+        </Button>
+      )
+    },
+    cell: ({ row }) => <div>{row.getValue("phone")}</div>,
+  },
+  {
+    id: "address",
+    accessorFn: row =>
+      `${row.street}, ${row.postcode} ${row.city}`,
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Address
+        <ArrowUpDown />
+      </Button>
+    ),
+    cell: ({ row }) => <div>{row.getValue("address")}</div>,
+  },
+  {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
@@ -139,6 +173,8 @@ export function EmployeeTable() {
   useEffect(() => {
     fetchEmployees().then((data) => setEmployees(data || [])).catch((err) => console.error(err));
   }, [fetchEmployees]);
+
+  console.log(employees);
 
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
