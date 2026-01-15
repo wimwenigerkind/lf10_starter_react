@@ -39,11 +39,6 @@ const data = {
       icon: IconListDetails,
     },
     {
-      title: "Projects",
-      url: "/projects",
-      icon: IconChartBar,
-    },
-    {
       title: "Employees",
       url: "/employees",
       icon: IconFolder,

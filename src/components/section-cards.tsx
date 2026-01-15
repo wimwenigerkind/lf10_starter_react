@@ -18,14 +18,6 @@ export function SectionCards() {
       </Card>
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Projects</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            NaN
-          </CardTitle>
-        </CardHeader>
-      </Card>
-      <Card className="@container/card">
-        <CardHeader>
           <CardDescription>Qualifications</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
             NaN
