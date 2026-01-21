@@ -3,6 +3,7 @@ import {Route, Routes} from "react-router-dom";
 import {Dashboard} from "./pages/Dashboard.tsx";
 import RequireAuth from "./auth/RequireAuth.tsx";
 import {EmployeeTable} from "./pages/EmployeeTable.tsx";
+import {QualificationsTable} from "./pages/QualificationsTable.tsx";
 import {AppSidebar} from "@/components/app-sidebar.tsx";
 import {SidebarInset, SidebarProvider} from "@/components/ui/sidebar.tsx";
 import {SiteHeader} from "@/components/site-header.tsx";
@@ -25,6 +26,11 @@ function App() {
                     <Route path="/" element={
                       <RequireAuth>
                         <Dashboard/>
+                      </RequireAuth>
+                    }/>
+                    <Route path="/qualifications" element={
+                      <RequireAuth>
+                        <QualificationsTable/>
                       </RequireAuth>
                     }/>
                     <Route path="/employees" element={
