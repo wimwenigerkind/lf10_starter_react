@@ -11,10 +11,10 @@ import {
   type SortingState,
   type VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
+import {ArrowUpDown, ChevronDown, MoreHorizontal} from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+import {Button} from "@/components/ui/button"
+import {Checkbox} from "@/components/ui/checkbox"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -24,7 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
+import {Input} from "@/components/ui/input"
 import {
   Table,
   TableBody,
@@ -44,7 +44,7 @@ export type Qualification = {
 const columns: ColumnDef<Qualification>[] = [
   {
     id: "select",
-    header: ({ table }) => (
+    header: ({table}) => (
       <Checkbox
         checked={
           table.getIsAllPageRowsSelected() ||
@@ -54,7 +54,7 @@ const columns: ColumnDef<Qualification>[] = [
         aria-label="Select all"
       />
     ),
-    cell: ({ row }) => (
+    cell: ({row}) => (
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
@@ -67,27 +67,27 @@ const columns: ColumnDef<Qualification>[] = [
   {
     accessorKey: "id",
     header: "ID",
-    cell: ({ row }) => <div>{row.getValue("id")}</div>,
+    cell: ({row}) => <div>{row.getValue("id")}</div>,
   },
   {
     accessorKey: "skill",
-    header: ({ column }) => {
+    header: ({column}) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Skill
-          <ArrowUpDown />
+          <ArrowUpDown/>
         </Button>
       )
     },
-    cell: ({ row }) => <div>{row.getValue("skill")}</div>,
+    cell: ({row}) => <div>{row.getValue("skill")}</div>,
   },
   {
     id: "actions",
     enableHiding: false,
-    cell: ({ row }) => {
+    cell: ({row}) => {
       const qualification = row.original
 
       return (
@@ -95,7 +95,7 @@ const columns: ColumnDef<Qualification>[] = [
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
+              <MoreHorizontal/>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -105,7 +105,7 @@ const columns: ColumnDef<Qualification>[] = [
             >
               Copy Qualification ID
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator/>
             <DropdownMenuItem>View qualification details</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -171,7 +171,7 @@ export function QualificationsTable() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
-              Columns <ChevronDown />
+              Columns <ChevronDown/>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
