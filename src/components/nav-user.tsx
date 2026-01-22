@@ -31,7 +31,6 @@ import {gravatarUrl} from "@/lib/utils.ts";
 
 export function NavUser() {
   const {isMobile} = useSidebar()
-  const {user} = useAuth();
   const {user, signoutRedirect} = useAuth();
 
   return (
