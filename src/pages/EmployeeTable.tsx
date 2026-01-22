@@ -11,10 +11,10 @@ import {
   type SortingState,
   type VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
+import {ArrowUpDown, ChevronDown, MoreHorizontal} from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+import {Button} from "@/components/ui/button"
+import {Checkbox} from "@/components/ui/checkbox"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -24,7 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
+import {Input} from "@/components/ui/input"
 import {
   Table,
   TableBody,
@@ -51,7 +51,7 @@ export type Employee = {
 const columns: ColumnDef<Employee>[] = [
   {
     id: "select",
-    header: ({ table }) => (
+    header: ({table}) => (
       <Checkbox
         checked={
           table.getIsAllPageRowsSelected() ||
@@ -61,7 +61,7 @@ const columns: ColumnDef<Employee>[] = [
         aria-label="Select all"
       />
     ),
-    cell: ({ row }) => (
+    cell: ({row}) => (
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
@@ -74,72 +74,72 @@ const columns: ColumnDef<Employee>[] = [
   {
     accessorKey: "id",
     header: "ID",
-    cell: ({ row }) => <div>{row.getValue("id")}</div>,
+    cell: ({row}) => <div>{row.getValue("id")}</div>,
   },
   {
     accessorKey: "firstName",
-    header: ({ column }) => {
+    header: ({column}) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           First Name
-          <ArrowUpDown />
+          <ArrowUpDown/>
         </Button>
       )
     },
-    cell: ({ row }) => <div>{row.getValue("firstName")}</div>,
+    cell: ({row}) => <div>{row.getValue("firstName")}</div>,
   },
   {
     accessorKey: "lastName",
-    header: ({ column }) => {
+    header: ({column}) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Last Name
-          <ArrowUpDown />
+          <ArrowUpDown/>
         </Button>
       )
     },
-    cell: ({ row }) => <div>{row.getValue("lastName")}</div>,
+    cell: ({row}) => <div>{row.getValue("lastName")}</div>,
   },
   {
     accessorKey: "phone",
-    header: ({ column }) => {
+    header: ({column}) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Phone Number
-          <ArrowUpDown />
+          <ArrowUpDown/>
         </Button>
       )
     },
-    cell: ({ row }) => <div>{row.getValue("phone")}</div>,
+    cell: ({row}) => <div>{row.getValue("phone")}</div>,
   },
   {
     id: "address",
     accessorFn: row =>
       `${row.street}, ${row.postcode} ${row.city}`,
-    header: ({ column }) => (
+    header: ({column}) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
         Address
-        <ArrowUpDown />
+        <ArrowUpDown/>
       </Button>
     ),
-    cell: ({ row }) => <div>{row.getValue("address")}</div>,
+    cell: ({row}) => <div>{row.getValue("address")}</div>,
   },
   {
     id: "actions",
     enableHiding: false,
-    cell: ({ row }) => {
+    cell: ({row}) => {
       const employee = row.original
 
       return (
@@ -147,7 +147,7 @@ const columns: ColumnDef<Employee>[] = [
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
+              <MoreHorizontal/>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -157,7 +157,7 @@ const columns: ColumnDef<Employee>[] = [
             >
               Copy Employee ID
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator/>
             <DropdownMenuItem>View employee details</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -167,7 +167,7 @@ const columns: ColumnDef<Employee>[] = [
 ]
 
 export function EmployeeTable() {
-  const {fetchEmployees, loading, error} = useEmployeeApi();
+  const {fetchEmployees, deleteEmployee, loading, error} = useEmployeeApi();
   const [employees, setEmployees] = useState<Employee[]>([]);
 
   useEffect(() => {
@@ -203,6 +203,26 @@ export function EmployeeTable() {
     },
   })
 
+  const hasSelectedRow = table.getFilteredSelectedRowModel().rows.length > 0;
+
+  const handleDelete = async () => {
+    const idsToDelete = table
+      .getSelectedRowModel()
+      .rows
+      .map((row) => row.original.id);
+
+    for (const index in idsToDelete) {
+      const id = idsToDelete[index];
+      await deleteEmployee(id);
+    }
+
+    const newArray = employees.filter(
+      (employee) => !idsToDelete.includes(employee.id)
+    );
+
+    setEmployees(newArray);
+  }
+
   if (loading) {
     return <div className="flex items-center justify-center p-8">Loading employees...</div>
   }
@@ -225,7 +245,7 @@ export function EmployeeTable() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
-              Columns <ChevronDown />
+              Columns <ChevronDown/>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -239,7 +259,7 @@ export function EmployeeTable() {
                     className="capitalize"
                     checked={column.getIsVisible()}
                     onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
+                      column.toggleVisibility(value)
                     }
                   >
                     {column.id}
@@ -305,6 +325,15 @@ export function EmployeeTable() {
           {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>
         <div className="space-x-2">
+          {hasSelectedRow && (
+            <Button
+              onClick={handleDelete}
+              variant="destructive"
+            >
+              Delete
+            </Button>
+          )}
+
           <Button
             variant="outline"
             size="sm"
