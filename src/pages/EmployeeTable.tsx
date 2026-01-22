@@ -207,21 +207,17 @@ export function EmployeeTable() {
 
   const handleDelete = async () => {
     const idsToDelete = table
-      .getSelectedRowModel()
+      .getFilteredSelectedRowModel()
       .rows
-      .map((row) => row.original.id);
+      .map(row => row.original.id);
 
-    for (const index in idsToDelete) {
-      const id = idsToDelete[index];
-      await deleteEmployee(id);
-    }
+    await Promise.all(idsToDelete.map(id => deleteEmployee(id)));
 
-    const newArray = employees.filter(
-      (employee) => !idsToDelete.includes(employee.id)
+    setEmployees(prev =>
+      prev.filter(employee => !idsToDelete.includes(employee.id))
     );
-
-    setEmployees(newArray);
-  }
+    setRowSelection(false);
+  };
 
   if (loading) {
     return <div className="flex items-center justify-center p-8">Loading employees...</div>
