@@ -32,6 +32,7 @@ import {gravatarUrl} from "@/lib/utils.ts";
 export function NavUser() {
   const {isMobile} = useSidebar()
   const {user} = useAuth();
+  const {user, signoutRedirect} = useAuth();
 
   return (
     <SidebarMenu>
@@ -91,7 +92,7 @@ export function NavUser() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator/>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => void signoutRedirect().catch(err => console.error("Logout failed", err))}>
               <IconLogout/>
               Log out
             </DropdownMenuItem>
