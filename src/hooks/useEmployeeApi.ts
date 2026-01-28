@@ -33,5 +33,29 @@ export function useEmployeeApi() {
         }
     }, [auth.user?.access_token]);
 
-    return {fetchEmployees, loading, error};
+  const deleteEmployee = async (id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      if (auth.user?.access_token) {
+        headers['Authorization'] = `Bearer ${auth.user.access_token}`;
+      }
+      const response = await fetch(apiUrl + '/employees/' + id, {
+        method: 'DELETE',
+        headers: headers
+      });
+      if (!response.ok) throw new Error(await response.text());
+      return true;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {fetchEmployees, deleteEmployee, loading, error};
 }
