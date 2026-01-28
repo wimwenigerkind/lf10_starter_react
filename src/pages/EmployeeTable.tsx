@@ -238,7 +238,10 @@ export function EmployeeTable() {
     setEmployees(prev =>
       prev.filter(employee => !idsToDelete.includes(employee.id))
     );
-    setRowSelection(false);
+    setFilteredEmployees(prev =>
+      prev.filter(employee => !idsToDelete.includes(employee.id))
+    );
+    setRowSelection({});
   };
 
   if (loading) {
