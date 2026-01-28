@@ -11,7 +11,7 @@ import {
   type SortingState,
   type VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
+import { ArrowUpDown, ChevronDown, MoreHorizontal, Filter } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -35,6 +35,8 @@ import {
 } from "@/components/ui/table"
 import {useEffect, useState} from "react";
 import {useEmployeeApi} from "@/hooks/useEmployeeApi.ts";
+import {useQualificationApi} from "@/hooks/useQualificationApi.ts";
+import type {Qualification} from "@/pages/QualificationsTable.tsx";
 
 export type Employee = {
   id: string
@@ -44,9 +46,12 @@ export type Employee = {
   street: string;
   postcode: string;
   city: string;
+  qualifications: string[];
 }
 
 // FIXME: split into multiple files
+
+
 
 const columns: ColumnDef<Employee>[] = [
   {
@@ -168,13 +173,32 @@ const columns: ColumnDef<Employee>[] = [
 
 export function EmployeeTable() {
   const {fetchEmployees, loading, error} = useEmployeeApi();
+  const { fetchQualifications, fetchEmployeesByQualification } = useQualificationApi()
+  const [qualifications, setQualifications] = useState<Qualification[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
+
+  const [selectedQualification, setSelectedQualification] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchEmployees().then((data) => setEmployees(data || [])).catch((err) => console.error(err));
-  }, [fetchEmployees]);
+    fetchEmployees().then((data) => {
+      setEmployees(data || []);
+      setFilteredEmployees(data || []);
+    }).catch((err) => console.error(err));
+    fetchQualifications().then((data) => setQualifications(data || [])).catch((err) => console.error(err));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  console.log(employees);
+  const handleQualificationFilter = async (qualificationId: string | null) => {
+    setSelectedQualification(qualificationId);
+    if (qualificationId === null) {
+      setFilteredEmployees(employees);
+    } else {
+      const data = await fetchEmployeesByQualification(qualificationId);
+      const employeeIds = (data?.employees || []).map((e: { id: number }) => e.id.toString());
+      setFilteredEmployees(employees.filter(emp => employeeIds.includes(emp.id.toString())));
+    }
+  };
 
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -185,7 +209,7 @@ export function EmployeeTable() {
   const [rowSelection, setRowSelection] = React.useState({})
 
   const table = useReactTable({
-    data: employees,
+    data: filteredEmployees,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -222,6 +246,35 @@ export function EmployeeTable() {
           }
           className="max-w-sm"
         />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="ml-auto">
+              <Filter className="mr-2 h-4 w-4" />
+              {qualifications.find(q => q.id === selectedQualification)?.skill || "Qualification"}
+              <ChevronDown className="ml-2" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Filter by Qualification</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuCheckboxItem
+              checked={selectedQualification === null}
+              onCheckedChange={() => handleQualificationFilter(null)}
+            >
+              All Qualifications
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuSeparator />
+            {qualifications.map((qual) => (
+              <DropdownMenuCheckboxItem
+                key={qual.id}
+                checked={selectedQualification === qual.id}
+                onCheckedChange={() => handleQualificationFilter(qual.id)}
+              >
+                {qual.skill}
+              </DropdownMenuCheckboxItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
