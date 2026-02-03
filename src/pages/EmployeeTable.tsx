@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/table"
 import {useEffect, useState} from "react";
 import {useEmployeeApi} from "@/hooks/useEmployeeApi.ts";
+import {CreateEmployeeDialog, type EmployeeFormData} from "@/pages/createEmployeePage.tsx";
 
 export type Employee = {
   id: string
@@ -167,8 +168,9 @@ const columns: ColumnDef<Employee>[] = [
 ]
 
 export function EmployeeTable() {
-  const {fetchEmployees, deleteEmployee, loading, error} = useEmployeeApi();
+  const {fetchEmployees, deleteEmployee, createEmployee, loading, error} = useEmployeeApi();
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchEmployees().then((data) => setEmployees(data || [])).catch((err) => console.error(err));
@@ -216,8 +218,16 @@ export function EmployeeTable() {
     setEmployees(prev =>
       prev.filter(employee => !idsToDelete.includes(employee.id))
     );
-    setRowSelection(false);
+    setRowSelection({});
   };
+
+  const handleCreateEmployee = async (formData: EmployeeFormData) => {
+    const createdEmployee = await createEmployee(formData);
+    if (createdEmployee) {
+      setEmployees(prev => [...prev, createdEmployee]);
+    }
+  };
+
 
   if (loading) {
     return <div className="flex items-center justify-center p-8">Loading employees...</div>
@@ -229,7 +239,7 @@ export function EmployeeTable() {
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
+      <div className="flex items-center justify-between py-4">
         <Input
           placeholder="Filter by first name..."
           value={(table.getColumn("firstName")?.getFilterValue() as string) ?? ""}
@@ -238,33 +248,45 @@ export function EmployeeTable() {
           }
           className="max-w-sm"
         />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns <ChevronDown/>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                )
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex gap-2">
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            Create
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ml-auto">
+                Columns <ChevronDown/>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  )
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
+
+      <CreateEmployeeDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        onSave={handleCreateEmployee}
+      />
+
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
