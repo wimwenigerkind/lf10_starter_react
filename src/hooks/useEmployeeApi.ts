@@ -1,6 +1,5 @@
 import {useAuth} from "react-oidc-context";
 import {useState, useCallback} from "react";
-import type {Employee} from "@/pages/EmployeeTable.tsx";
 import type {EmployeeFormData} from "@/pages/createEmployeePage.tsx";
 
 const apiUrl = import.meta.env.VITE_EMS_API_URL || 'http://localhost:8089';
@@ -91,5 +90,27 @@ export function useEmployeeApi() {
     }
   };
 
-  return {fetchEmployees, deleteEmployee, createEmployee, loading, error};
+  const addQualificationToEmployee = async (employeeId: string, skill: string) => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+
+    if (auth.user?.access_token) {
+      headers['Authorization'] = `Bearer ${auth.user.access_token}`;
+    }
+
+    const response = await fetch(`${apiUrl}/employees/${employeeId}/qualifications`, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({ skill })
+    });
+
+    if (!response.ok) {
+      throw new Error(await response.text());
+    }
+
+    return await response.json();
+  };
+
+  return {fetchEmployees, deleteEmployee, createEmployee, addQualificationToEmployee, loading, error};
 }

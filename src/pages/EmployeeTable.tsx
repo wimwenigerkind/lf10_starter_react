@@ -171,7 +171,7 @@ const columns: ColumnDef<Employee>[] = [
 ]
 
 export function EmployeeTable() {
-  const {fetchEmployees, deleteEmployee, createEmployee, loading, error} = useEmployeeApi();
+  const {fetchEmployees, deleteEmployee, createEmployee, addQualificationToEmployee, loading, error} = useEmployeeApi();
   const { fetchQualifications, fetchEmployeesByQualification } = useQualificationApi()
   const [qualifications, setQualifications] = useState<Qualification[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -249,7 +249,12 @@ export function EmployeeTable() {
   const handleCreateEmployee = async (formData: EmployeeFormData) => {
     const createdEmployee = await createEmployee(formData);
     if (createdEmployee) {
-      setEmployees(prev => [...prev, createdEmployee]);
+      await Promise.all(
+        formData.qualifications.map(q =>
+          addQualificationToEmployee(createdEmployee.id, q.skill)
+        )
+      );
+      setEmployees(prev => [...prev, { ...createdEmployee, qualifications: formData.qualifications.map(q => q.skill) }]);
     }
   };
 
