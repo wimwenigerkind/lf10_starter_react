@@ -172,7 +172,6 @@ const columns: ColumnDef<Employee>[] = [
 
 export function EmployeeTable() {
   const {fetchEmployees, deleteEmployee, createEmployee, loading, error} = useEmployeeApi();
-  const {fetchEmployees, deleteEmployee, loading, error} = useEmployeeApi();
   const { fetchQualifications, fetchEmployeesByQualification } = useQualificationApi()
   const [qualifications, setQualifications] = useState<Qualification[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -266,86 +265,60 @@ export function EmployeeTable() {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between py-4">
-        <Input
-          placeholder="Filter by first name..."
-          value={(table.getColumn("firstName")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("firstName")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-        <div className="flex gap-2">
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
-            Create
-          </Button>
+        {/* LEFT SIDE */}
+        <div className="flex items-center gap-2">
+          <Input
+            placeholder="Filter by first name..."
+            value={(table.getColumn("firstName")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("firstName")?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm"
+          />
+
+          {/* Qualification */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                Columns <ChevronDown/>
+              <Button variant="outline">
+                <Filter className="mr-2 h-4 w-4" />
+                {qualifications.find(q => q.id === selectedQualification)?.skill || "Qualification"}
+                <ChevronDown className="ml-2" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="start">
+              <DropdownMenuLabel>Filter by Qualification</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuCheckboxItem
+                checked={selectedQualification === null}
+                onCheckedChange={() => handleQualificationFilter(null)}
+              >
+                All Qualifications
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuSeparator />
+              {qualifications.map((qual) => (
+                <DropdownMenuCheckboxItem
+                  key={qual.id}
+                  checked={selectedQualification === qual.id}
+                  onCheckedChange={() => handleQualificationFilter(qual.id)}
+                >
+                  {qual.skill}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Columns */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                Columns <ChevronDown className="ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
               {table
                 .getAllColumns()
                 .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  )
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              <Filter className="mr-2 h-4 w-4" />
-              {qualifications.find(q => q.id === selectedQualification)?.skill || "Qualification"}
-              <ChevronDown className="ml-2" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Filter by Qualification</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuCheckboxItem
-              checked={selectedQualification === null}
-              onCheckedChange={() => handleQualificationFilter(null)}
-            >
-              All Qualifications
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuSeparator />
-            {qualifications.map((qual) => (
-              <DropdownMenuCheckboxItem
-                key={qual.id}
-                checked={selectedQualification === qual.id}
-                onCheckedChange={() => handleQualificationFilter(qual.id)}
-              >
-                {qual.skill}
-              </DropdownMenuCheckboxItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns <ChevronDown/>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
+                .map((column) => (
                   <DropdownMenuCheckboxItem
                     key={column.id}
                     className="capitalize"
@@ -356,10 +329,15 @@ export function EmployeeTable() {
                   >
                     {column.id}
                   </DropdownMenuCheckboxItem>
-                )
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+                ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* RIGHT SIDE */}
+        <Button onClick={() => setIsCreateDialogOpen(true)}>
+          Create
+        </Button>
       </div>
 
       <CreateEmployeeDialog

@@ -31,7 +31,7 @@ export interface EmployeeFormData {
   street: string;
   postcode: string;
   city: string;
-  skillSet: Qualification[];
+  qualifications: Qualification[];
 }
 
 interface CreateEmployeeDialogProps {
@@ -54,7 +54,7 @@ export function CreateEmployeeDialog({
     street: "",
     postcode: "",
     city: "",
-    skillSet: [],
+    qualifications: [],
   });
 
   const [errors, setErrors] = useState<string[]>([]);
@@ -75,16 +75,16 @@ export function CreateEmployeeDialog({
 
   const handleQualificationToggle = (qualification: Qualification) => {
     setFormData((prev) => {
-      const isSelected = prev.skillSet.some((q) => q.id === qualification.id);
+      const isSelected = prev.qualifications.some((q) => q.id === qualification.id);
       if (isSelected) {
         return {
           ...prev,
-          skillSet: prev.skillSet.filter((q) => q.id !== qualification.id),
+          qualifications: prev.qualifications.filter((q) => q.id !== qualification.id),
         };
       } else {
         return {
           ...prev,
-          skillSet: [...prev.skillSet, qualification],
+          qualifications: [...prev.qualifications, qualification],
         };
       }
     });
@@ -136,7 +136,7 @@ export function CreateEmployeeDialog({
       street: "",
       postcode: "",
       city: "",
-      skillSet: [],
+      qualifications: [],
     });
     setErrors([]);
   };
@@ -165,9 +165,9 @@ export function CreateEmployeeDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>1<DialogContent className="sm:max-w-[500px]">
+    <Dialog open={open} onOpenChange={onOpenChange}><DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Neuen Mitarbeiter erstellen</DialogTitle>
+          <DialogTitle>Create new employee</DialogTitle>
           <DialogDescription>
             Füllen Sie alle Felder aus, um einen neuen Mitarbeiter anzulegen.
           </DialogDescription>
@@ -210,8 +210,8 @@ export function CreateEmployeeDialog({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="w-full justify-between">
-                  {formData.skillSet.length > 0
-                    ? `${formData.skillSet.length} ausgewählt`
+                  {formData.qualifications.length > 0
+                    ? `${formData.qualifications.length} ausgewählt`
                     : "Qualifikationen auswählen"}
                   <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
@@ -220,7 +220,7 @@ export function CreateEmployeeDialog({
                 {qualifications.map((qualification) => (
                   <DropdownMenuCheckboxItem
                     key={qualification.id}
-                    checked={formData.skillSet.some((q) => q.id === qualification.id)}
+                    checked={formData.qualifications.some((q) => q.id === qualification.id)}
                     onCheckedChange={() => handleQualificationToggle(qualification)}
                   >
                     {qualification.skill}
@@ -234,9 +234,9 @@ export function CreateEmployeeDialog({
               </DropdownMenuContent>
 
             </DropdownMenu>
-            {formData.skillSet.length > 0 && (
+            {formData.qualifications.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2">
-                {formData.skillSet.map((q) => (
+                {formData.qualifications.map((q) => (
                   <span
                     key={q.id}
                     className="bg-primary/10 text-primary text-xs px-2 py-1 rounded"

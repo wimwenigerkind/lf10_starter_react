@@ -1,6 +1,7 @@
 import {useAuth} from "react-oidc-context";
 import {useState, useCallback} from "react";
 import type {Employee} from "@/pages/EmployeeTable.tsx";
+import type {EmployeeFormData} from "@/pages/createEmployeePage.tsx";
 
 const apiUrl = import.meta.env.VITE_EMS_API_URL || 'http://localhost:8089';
 
@@ -58,7 +59,7 @@ export function useEmployeeApi() {
     }
   };
 
-  const createEmployee = async (employee: Omit<Employee, 'id'>) => {
+  const createEmployee = async (employee: EmployeeFormData) => {
     setLoading(true);
     setError(null);
 
