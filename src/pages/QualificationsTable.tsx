@@ -48,6 +48,7 @@ export function QualificationsTable() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalInitialData, setModalInitialData] = useState<{id?: string, skill: string} | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchQualifications().then((data) => setQualifications(data || [])).catch((err) => console.error(err));
@@ -208,11 +209,13 @@ export function QualificationsTable() {
   const handleDelete = async () => {
     if (!selectedRowId) return;
     setActionLoading(true);
+    setDeleteError(null);
     try {
       await deleteQualification(selectedRowId);
       const refreshed = await fetchQualifications();
       setQualifications(refreshed || []);
-      // No need to reset selectedRowId, rowSelection will be reset by table
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Failed to delete qualification.");
     } finally {
       setActionLoading(false);
     }
@@ -228,6 +231,11 @@ export function QualificationsTable() {
 
   return (
     <div className="w-full">
+      {deleteError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+          {deleteError}
+        </div>
+      )}
       <div className="flex items-center py-4 gap-2">
         <Button onClick={handleCreate} variant="default">Create Qualification</Button>
         <Button onClick={handleDelete} variant="destructive" disabled={!selectedRowId || actionLoading}>Delete Selected</Button>

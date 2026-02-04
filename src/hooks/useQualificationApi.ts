@@ -137,11 +137,12 @@ export function useQualificationApi() {
         headers
       });
       if (!response.ok) {
-        setError("Fehler beim Löschen der Qualifikation");
+        throw new Error("This qualification cannot be deleted because it is still assigned to one or more employees.");
       }
-      return response.ok;
+      return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
+      throw err;
     } finally {
       setLoading(false);
     }
