@@ -37,6 +37,7 @@ import {useEffect, useState} from "react";
 import {useEmployeeApi} from "@/hooks/useEmployeeApi.ts";
 import {CreateEmployeeDialog, type EmployeeFormData} from "@/pages/createEmployeePage.tsx";
 import {EditEmployeeDialog, type EditEmployeeFormData} from "@/pages/editEmployeePage.tsx";
+import {ViewEmployeeDialog} from "@/pages/viewEmployeePage.tsx";
 import {useQualificationApi} from "@/hooks/useQualificationApi.ts";
 import type {Qualification} from "@/pages/QualificationsTable.tsx";
 
@@ -60,6 +61,7 @@ export function EmployeeTable() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
 
@@ -68,6 +70,11 @@ export function EmployeeTable() {
   const handleOpenEditDialog = (employee: Employee) => {
     setSelectedEmployee(employee);
     setIsEditDialogOpen(true);
+  };
+
+  const handleOpenViewDialog = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setIsViewDialogOpen(true);
   };
 
   const columns: ColumnDef<Employee>[] = [
@@ -183,7 +190,7 @@ export function EmployeeTable() {
               <DropdownMenuItem onClick={() => handleOpenEditDialog(employee)}>
                 Edit employee
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleOpenViewDialog(employee)}>
                 View details
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -383,6 +390,15 @@ export function EmployeeTable() {
           if (!open) setSelectedEmployee(null);
         }}
         onSave={handleEditEmployee}
+        employee={selectedEmployee}
+      />
+
+      <ViewEmployeeDialog
+        open={isViewDialogOpen}
+        onOpenChange={(open) => {
+          setIsViewDialogOpen(open);
+          if (!open) setSelectedEmployee(null);
+        }}
         employee={selectedEmployee}
       />
 
