@@ -35,100 +35,123 @@ import {
 } from "@/components/ui/table"
 import {useEffect, useState} from "react";
 import {useQualificationApi} from "@/hooks/useQualificationApi.ts";
+import { QualificationFormModal } from "@/components/QualificationFormModal";
 
 export type Qualification = {
   id: string
   skill: string
 }
 
-const columns: ColumnDef<Qualification>[] = [
-  {
-    id: "select",
-    header: ({table}) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({row}) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "id",
-    header: "ID",
-    cell: ({row}) => <div>{row.getValue("id")}</div>,
-  },
-  {
-    accessorKey: "skill",
-    header: ({column}) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Skill
-          <ArrowUpDown/>
-        </Button>
-      )
-    },
-    cell: ({row}) => <div>{row.getValue("skill")}</div>,
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    cell: ({row}) => {
-      const qualification = row.original
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal/>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(qualification.id)}
-            >
-              Copy Qualification ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator/>
-            <DropdownMenuItem>View qualification details</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    },
-  },
-]
-
 export function QualificationsTable() {
-  const {fetchQualifications, loading, error} = useQualificationApi();
+  const {fetchQualifications, createQualification, updateQualification, deleteQualification, loading, error} = useQualificationApi();
   const [qualifications, setQualifications] = useState<Qualification[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalInitialData, setModalInitialData] = useState<{id?: string, skill: string} | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     fetchQualifications().then((data) => setQualifications(data || [])).catch((err) => console.error(err));
   }, [fetchQualifications]);
 
   const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+  const [rowSelection, setRowSelection] = React.useState({});
+
+  // Compute selectedRowId from rowSelection and table
+  const columns: ColumnDef<Qualification>[] = [
+    {
+      id: "select",
+      header: ({table}) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+          onCheckedChange={(value) => {
+            // Only allow single selection for the whole page
+            if (value) {
+              const firstRow = table.getRowModel().rows[0];
+              if (firstRow) {
+                table.resetRowSelection();
+                firstRow.toggleSelected(true);
+              }
+            } else {
+              table.resetRowSelection();
+            }
+          }}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({row, table}) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => {
+            if (value) {
+              // Single select: clear all, then select this
+              table.resetRowSelection();
+              row.toggleSelected(true);
+            } else {
+              row.toggleSelected(false);
+            }
+          }}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "id",
+      header: "ID",
+      cell: ({row}) => <div>{row.getValue("id")}</div>,
+    },
+    {
+      accessorKey: "skill",
+      header: ({column}) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Skill
+            <ArrowUpDown/>
+          </Button>
+        )
+      },
+      cell: ({row}) => <div>{row.getValue("skill")}</div>,
+    },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({row}) => {
+        const qualification = row.original
+        return (
+          <div className="flex gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal/>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem
+                  onClick={() => navigator.clipboard.writeText(qualification.id)}
+                >
+                  Copy Qualification ID
+                </DropdownMenuItem>
+                <DropdownMenuSeparator/>
+                <DropdownMenuItem onClick={() => {
+                  setModalInitialData(qualification);
+                  setModalOpen(true);
+                }}>Edit</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )
+      },
+    },
+  ]
+
 
   const table = useReactTable({
     data: qualifications,
@@ -149,6 +172,52 @@ export function QualificationsTable() {
     },
   })
 
+  // Compute selectedRowId from rowSelection and table
+  const selectedIndexes = Object.keys(rowSelection);
+  let selectedRowId: string | null = null;
+  if (selectedIndexes.length === 1) {
+    const idx = Number(selectedIndexes[0]);
+    const row = table.getRowModel().rows[idx];
+    selectedRowId = row ? row.original.id : null;
+  }
+
+  // Modal logic
+  const handleCreate = () => {
+    setModalInitialData(null);
+    setModalOpen(true);
+  };
+  const handleModalClose = () => {
+    setModalOpen(false);
+    setModalInitialData(null);
+  };
+  const handleModalSubmit = async (data: { id?: string; skill: string }) => {
+    setActionLoading(true);
+    try {
+      if (data.id) {
+        await updateQualification(data.id, { skill: data.skill });
+      } else {
+        await createQualification({ skill: data.skill });
+      }
+      const refreshed = await fetchQualifications();
+      setQualifications(refreshed || []);
+      handleModalClose();
+    } finally {
+      setActionLoading(false);
+    }
+  };
+  const handleDelete = async () => {
+    if (!selectedRowId) return;
+    setActionLoading(true);
+    try {
+      await deleteQualification(selectedRowId);
+      const refreshed = await fetchQualifications();
+      setQualifications(refreshed || []);
+      // No need to reset selectedRowId, rowSelection will be reset by table
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   if (loading) {
     return <div className="flex items-center justify-center p-8">Loading qualifications...</div>
   }
@@ -159,7 +228,9 @@ export function QualificationsTable() {
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
+      <div className="flex items-center py-4 gap-2">
+        <Button onClick={handleCreate} variant="default">Create Qualification</Button>
+        <Button onClick={handleDelete} variant="destructive" disabled={!selectedRowId || actionLoading}>Delete Selected</Button>
         <Input
           placeholder="Filter by skill..."
           value={(table.getColumn("skill")?.getFilterValue() as string) ?? ""}
@@ -221,6 +292,8 @@ export function QualificationsTable() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className={selectedRowId === row.original.id ? "bg-muted" : ""}
+                  style={{ cursor: "pointer" }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -269,6 +342,13 @@ export function QualificationsTable() {
           </Button>
         </div>
       </div>
+      <QualificationFormModal
+        open={modalOpen}
+        onClose={handleModalClose}
+        onSubmit={handleModalSubmit}
+        initialData={modalInitialData}
+        loading={actionLoading}
+      />
     </div>
   )
 }
