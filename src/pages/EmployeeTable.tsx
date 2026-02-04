@@ -54,7 +54,7 @@ export type Employee = {
 // FIXME: split into multiple files
 
 export function EmployeeTable() {
-  const {fetchEmployees, deleteEmployee, createEmployee, addQualificationToEmployee, updateEmployee, removeQualificationFromEmployee, loading, error} = useEmployeeApi();
+  const {fetchEmployees, deleteEmployee, createEmployee, addQualificationToEmployee, updateEmployee, loading, error} = useEmployeeApi();
   const {fetchQualifications, fetchEmployeesByQualification} = useQualificationApi()
   const [qualifications, setQualifications] = useState<Qualification[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
