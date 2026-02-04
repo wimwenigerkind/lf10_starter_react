@@ -1,5 +1,6 @@
 import {useAuth} from "react-oidc-context";
 import {useState, useCallback} from "react";
+import type {EmployeeFormData} from "@/pages/createEmployeePage.tsx";
 
 const apiUrl = import.meta.env.VITE_EMS_API_URL || 'http://localhost:8089';
 
@@ -25,7 +26,11 @@ export function useEmployeeApi() {
             if (!response.ok) {
                 setError("Fehler beim Laden der Mitarbeiter");
             }
-            return await response.json();
+            const data = await response.json();
+            return data.map((emp: Record<string, unknown>) => ({
+                ...emp,
+                qualifications: emp.skillSet || [],
+            }));
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
         } finally {
@@ -57,5 +62,113 @@ export function useEmployeeApi() {
     }
   };
 
-  return {fetchEmployees, deleteEmployee, loading, error};
+  const createEmployee = async (employee: EmployeeFormData) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+
+      if (auth.user?.access_token) {
+        headers['Authorization'] = `Bearer ${auth.user.access_token}`;
+      }
+
+      const { qualifications, ...employeeData } = employee;
+      const response = await fetch(`${apiUrl}/employees`, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({
+          ...employeeData,
+          skillSet: qualifications.map(q => Number(q.id))
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+
+      const created = await response.json();
+      return { ...created, qualifications: created.skillSet || [] };
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addQualificationToEmployee = async (employeeId: string, skill: string) => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+
+    if (auth.user?.access_token) {
+      headers['Authorization'] = `Bearer ${auth.user.access_token}`;
+    }
+
+    const response = await fetch(`${apiUrl}/employees/${employeeId}/qualifications`, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({ skill })
+    });
+
+    if (!response.ok) {
+      throw new Error(await response.text());
+    }
+
+    return await response.json();
+  };
+
+  const updateEmployee = async (employeeId: string, employee: EmployeeFormData) => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+
+    if (auth.user?.access_token) {
+      headers['Authorization'] = `Bearer ${auth.user.access_token}`;
+    }
+
+    const { qualifications = [], ...employeeData } = employee;
+    const response = await fetch(`${apiUrl}/employees/${employeeId}`, {
+      method: 'PUT',
+      headers: headers,
+      body: JSON.stringify({
+        ...employeeData,
+        skillSet: qualifications.map(q => Number(q.id))
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(await response.text());
+    }
+
+    const updated = await response.json();
+    return { ...updated, qualifications: updated.skillSet || [] };
+  };
+
+  const removeQualificationFromEmployee = async (employeeId: string, skill: string) => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+
+    if (auth.user?.access_token) {
+      headers['Authorization'] = `Bearer ${auth.user.access_token}`;
+    }
+
+    const response = await fetch(`${apiUrl}/employees/${employeeId}/qualifications`, {
+      method: 'DELETE',
+      headers: headers,
+      body: JSON.stringify({ skill })
+    });
+
+    if (!response.ok) {
+      throw new Error(await response.text());
+    }
+
+    return await response.json();
+  };
+
+  return {fetchEmployees, deleteEmployee, createEmployee, addQualificationToEmployee, updateEmployee, removeQualificationFromEmployee, loading, error};
 }
