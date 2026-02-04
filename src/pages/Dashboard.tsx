@@ -1,5 +1,3 @@
-import {SectionCards} from "@/components/section-cards.tsx";
-
 export function Dashboard() {
   return (
     <div className="flex flex-1 flex-col">
