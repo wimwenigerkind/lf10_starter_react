@@ -1,5 +1,5 @@
 import {useAuth} from "react-oidc-context";
-import {useState, useCallback} from "react";
+import {useCallback, useState} from "react";
 
 const apiUrl = import.meta.env.VITE_EMS_API_URL || 'http://localhost:8089';
 
@@ -58,7 +58,6 @@ export function useQualificationApi() {
     }
   }, [auth.user?.access_token]);
 
-  return {fetchQualifications, fetchEmployeesByQualification, loading, error};
   // Create Qualification
   const createQualification = useCallback(async (qualification: { skill: string }) => {
     setLoading(true);
@@ -148,5 +147,5 @@ export function useQualificationApi() {
     }
   }, [auth.user?.access_token]);
 
-  return {fetchQualifications, createQualification, updateQualification, deleteQualification, loading, error};
+  return {fetchQualifications, createQualification, updateQualification, deleteQualification, fetchEmployeesByQualification, loading, error};
 }
