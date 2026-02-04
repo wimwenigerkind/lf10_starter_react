@@ -26,7 +26,11 @@ export function useEmployeeApi() {
             if (!response.ok) {
                 setError("Fehler beim Laden der Mitarbeiter");
             }
-            return await response.json();
+            const data = await response.json();
+            return data.map((emp: Record<string, unknown>) => ({
+                ...emp,
+                qualifications: emp.skillSet || [],
+            }));
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
         } finally {
@@ -71,17 +75,22 @@ export function useEmployeeApi() {
         headers['Authorization'] = `Bearer ${auth.user.access_token}`;
       }
 
+      const { qualifications, ...employeeData } = employee;
       const response = await fetch(`${apiUrl}/employees`, {
         method: 'POST',
         headers: headers,
-        body: JSON.stringify(employee)
+        body: JSON.stringify({
+          ...employeeData,
+          skillSet: qualifications.map(q => Number(q.id))
+        })
       });
 
       if (!response.ok) {
         throw new Error(await response.text());
       }
 
-      return await response.json();
+      const created = await response.json();
+      return { ...created, qualifications: created.skillSet || [] };
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
       throw err;
@@ -113,35 +122,30 @@ export function useEmployeeApi() {
   };
 
   const updateEmployee = async (employeeId: string, employee: EmployeeFormData) => {
-    setLoading(true);
-    setError(null);
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
 
-    try {
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
-      };
-
-      if (auth.user?.access_token) {
-        headers['Authorization'] = `Bearer ${auth.user.access_token}`;
-      }
-
-      const response = await fetch(`${apiUrl}/employees/${employeeId}`, {
-        method: 'PUT',
-        headers: headers,
-        body: JSON.stringify(employee)
-      });
-
-      if (!response.ok) {
-        throw new Error(await response.text());
-      }
-
-      return await response.json();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
-      throw err;
-    } finally {
-      setLoading(false);
+    if (auth.user?.access_token) {
+      headers['Authorization'] = `Bearer ${auth.user.access_token}`;
     }
+
+    const { qualifications = [], ...employeeData } = employee;
+    const response = await fetch(`${apiUrl}/employees/${employeeId}`, {
+      method: 'PUT',
+      headers: headers,
+      body: JSON.stringify({
+        ...employeeData,
+        skillSet: qualifications.map(q => Number(q.id))
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(await response.text());
+    }
+
+    const updated = await response.json();
+    return { ...updated, qualifications: updated.skillSet || [] };
   };
 
   const removeQualificationFromEmployee = async (employeeId: string, skill: string) => {

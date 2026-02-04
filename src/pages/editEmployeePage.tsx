@@ -61,24 +61,27 @@ export function EditEmployeeDialog({
 
   useEffect(() => {
     if (open && employee) {
+      setFormData({
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        phone: employee.phone,
+        street: employee.street,
+        postcode: employee.postcode,
+        city: employee.city,
+        qualifications: [],
+      });
+
       fetchQualifications().then((data) => {
         const allQualifications = data || [];
         setQualifications(allQualifications);
 
-        const employeeQuals = employee.qualifications.map(skill => {
-          const qual = allQualifications.find((q: Qualification) => q.skill === skill);
-          return qual || { id: skill, skill };
+        const employeeQuals = employee.qualifications.map((entry: unknown) => {
+          const skillName = typeof entry === 'string' ? entry : (entry as Qualification).skill;
+          const qual = allQualifications.find((q: Qualification) => q.skill === skillName);
+          return qual || { id: typeof entry === 'string' ? entry : (entry as Qualification).id, skill: skillName };
         });
 
-        setFormData({
-          firstName: employee.firstName,
-          lastName: employee.lastName,
-          phone: employee.phone,
-          street: employee.street,
-          postcode: employee.postcode,
-          city: employee.city,
-          qualifications: employeeQuals,
-        });
+        setFormData(prev => ({ ...prev, qualifications: employeeQuals }));
       });
     }
   }, [open, employee, fetchQualifications]);
@@ -156,7 +159,7 @@ export function EditEmployeeDialog({
       onOpenChange(false);
     } catch (err) {
       console.error("Fehler beim Speichern:", err);
-      setErrors(["Fehler beim Aktualisieren des Mitarbeiters"]);
+      setErrors([err instanceof Error ? err.message : "Fehler beim Aktualisieren des Mitarbeiters"]);
     } finally {
       setIsSubmitting(false);
     }

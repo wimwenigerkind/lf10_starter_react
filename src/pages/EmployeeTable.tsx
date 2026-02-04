@@ -48,13 +48,13 @@ export type Employee = {
   street: string;
   postcode: string;
   city: string;
-  qualifications: string[];
+  qualifications: Array<string | { id: string; skill: string }>;
 }
 
 // FIXME: split into multiple files
 
 export function EmployeeTable() {
-  const {fetchEmployees, deleteEmployee, createEmployee, addQualificationToEmployee, updateEmployee, loading, error} = useEmployeeApi();
+  const {fetchEmployees, deleteEmployee, createEmployee, addQualificationToEmployee, updateEmployee, removeQualificationFromEmployee, loading, error} = useEmployeeApi();
   const {fetchQualifications, fetchEmployeesByQualification} = useQualificationApi()
   const [qualifications, setQualifications] = useState<Qualification[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -255,7 +255,11 @@ export function EmployeeTable() {
     if (selectedEmployee) {
       const updatedEmployee = await updateEmployee(selectedEmployee.id, formData);
       if (updatedEmployee) {
-        setEmployees(prev => prev.map(emp => emp.id === updatedEmployee.id ? { ...emp, ...updatedEmployee } : emp));
+        const updateList = (prev: Employee[]) => prev.map(emp =>
+          emp.id === updatedEmployee.id ? updatedEmployee : emp
+        );
+        setEmployees(updateList);
+        setFilteredEmployees(updateList);
       }
     }
   };
@@ -374,7 +378,10 @@ export function EmployeeTable() {
 
       <EditEmployeeDialog
         open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
+        onOpenChange={(open) => {
+          setIsEditDialogOpen(open);
+          if (!open) setSelectedEmployee(null);
+        }}
         onSave={handleEditEmployee}
         employee={selectedEmployee}
       />
