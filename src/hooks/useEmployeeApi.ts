@@ -112,5 +112,59 @@ export function useEmployeeApi() {
     return await response.json();
   };
 
-  return {fetchEmployees, deleteEmployee, createEmployee, addQualificationToEmployee, loading, error};
+  const updateEmployee = async (employeeId: string, employee: EmployeeFormData) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+
+      if (auth.user?.access_token) {
+        headers['Authorization'] = `Bearer ${auth.user.access_token}`;
+      }
+
+      const response = await fetch(`${apiUrl}/employees/${employeeId}`, {
+        method: 'PUT',
+        headers: headers,
+        body: JSON.stringify(employee)
+      });
+
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+
+      return await response.json();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removeQualificationFromEmployee = async (employeeId: string, skill: string) => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+
+    if (auth.user?.access_token) {
+      headers['Authorization'] = `Bearer ${auth.user.access_token}`;
+    }
+
+    const response = await fetch(`${apiUrl}/employees/${employeeId}/qualifications`, {
+      method: 'DELETE',
+      headers: headers,
+      body: JSON.stringify({ skill })
+    });
+
+    if (!response.ok) {
+      throw new Error(await response.text());
+    }
+
+    return await response.json();
+  };
+
+  return {fetchEmployees, deleteEmployee, createEmployee, addQualificationToEmployee, updateEmployee, removeQualificationFromEmployee, loading, error};
 }
